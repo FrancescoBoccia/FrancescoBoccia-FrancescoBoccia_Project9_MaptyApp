@@ -5,6 +5,7 @@
 class Workout {
   date = new Date();
   id = (Date.now() + '').slice(-10);
+  clicks = 0;
 
   constructor(coords, distance, duration) {
     this.coords = coords; // [lat, lng]
@@ -17,6 +18,9 @@ class Workout {
     this.description = `${this.type[0].toUpperCase()}${this.type.slice(1)} on ${
       months[this.date.getMonth()]
     } ${this.date.getDate()}`;
+  }
+  click() {
+    this.clicks++;
   }
 }
 
@@ -67,6 +71,7 @@ const inputElevation = document.querySelector('.form__input--elevation');
 
 class App {
   #map;
+  #mapZoomLevel = 14;
   #mapEvent;
   #workouts = [];
 
@@ -74,6 +79,7 @@ class App {
     this._getPosition();
     form.addEventListener('submit', this._newWorkout.bind(this));
     inputType.addEventListener('change', this._toggleElevationField);
+    containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
   }
 
   _getPosition() {
@@ -95,7 +101,7 @@ class App {
     // Leaflet Library
     const coords = [latitude, longitude];
 
-    this.#map = L.map('map').setView(coords, 14); // 13 is the zoom of the map
+    this.#map = L.map('map').setView(coords, this.#mapZoomLevel); // 13 is the zoom of the map
 
     L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
       attribution:
@@ -221,7 +227,7 @@ class App {
       <span class="workout__unit">min</span>
     </div>`;
 
-    if (workout.type === 'running') {
+    if (workout.type === 'running')
       html += `          
         <div class="workout__details">
         <span class="workout__icon">⚡️</span>
@@ -234,8 +240,8 @@ class App {
         <span class="workout__unit">spm</span>
       </div>
       </li>`;
-    }
-    if (workout.type === 'cycling') {
+
+    if (workout.type === 'cycling')
       html += `          
         <div class="workout__details">
         <span class="workout__icon">⚡️</span>
@@ -248,9 +254,31 @@ class App {
         <span class="workout__unit">m</span>
       </div>
     </li> -->`;
-    }
 
     form.insertAdjacentHTML('afterend', html);
+  }
+
+  _moveToPopup(e) {
+    const workoutEl = e.target.closest('.workout');
+    console.log(workoutEl);
+
+    if (!workoutEl) return;
+
+    const workout = this.#workouts.find(
+      work => work.id === workoutEl.dataset.id
+    );
+    console.log(workout);
+
+    // setView is from Leaflet library
+    this.#map.setView(workout.coords, this.#mapZoomLevel, {
+      animate: true,
+      pan: {
+        duration: 1,
+      },
+    });
+
+    // Using the Public Interface
+    workout.click();
   }
 }
 
