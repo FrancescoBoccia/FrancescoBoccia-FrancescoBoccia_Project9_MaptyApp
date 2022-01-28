@@ -71,7 +71,7 @@ a:visited {
   border-radius: 5px;
   padding: 1.5rem 2.25rem;
   margin-bottom: 1.75rem;
-  cursor: pointer;
+  cursor: help;
 
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
@@ -217,4 +217,27 @@ a:visited {
 }
 .cycling-popup .leaflet-popup-content-wrapper {
   border-left: 5px solid var(--color-brand--1);
+}
+
+#delete {
+  color: red;
+  float: right;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+.delete__button {
+  margin: 0 auto;
+  margin-top: 4rem;
+  font-weight: 700;
+  font-size: 13px;
+  max-width: 8rem;
+  max-height: 8rem;
+  text-align: center;
+  border: 1px solid red;
+  background-color: red;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.delete__button.hidden {
+  display: none;
 }

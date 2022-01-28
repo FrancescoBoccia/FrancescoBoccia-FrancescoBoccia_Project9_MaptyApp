@@ -68,6 +68,7 @@ const inputDistance = document.querySelector('.form__input--distance');
 const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
+const deleteAllButton = document.querySelector('.delete__button');
 
 class App {
   #map;
@@ -85,6 +86,8 @@ class App {
     form.addEventListener('submit', this._newWorkout.bind(this));
     inputType.addEventListener('change', this._toggleElevationField);
     containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
+    document.addEventListener('click', this._deleteWorkout.bind(this));
+    deleteAllButton.addEventListener('click', this.reset.bind(this));
   }
 
   _getPosition() {
@@ -106,7 +109,7 @@ class App {
     // Leaflet Library
     const coords = [latitude, longitude];
 
-    this.#map = L.map('map').setView(coords, this.#mapZoomLevel); // 13 is the zoom of the map
+    this.#map = L.map('map').setView(coords, this.#mapZoomLevel); // #mapZoomLevel is the zoom of the map
 
     L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
       attribution:
@@ -186,7 +189,7 @@ class App {
       workout = new Cycling([lat, lng], distance, duration, elevation);
     }
 
-    // Add new object to workoyt array
+    // Add new object to workout array
     this.#workouts.push(workout);
 
     // Render workout on map as marker
@@ -225,7 +228,9 @@ class App {
     let html = `<li class="workout workout--${workout.type}" data-id="${
       workout.id
     }">
-    <h2 class="workout__title">${workout.description}</h2>
+    <h2 class="workout__title">${
+      workout.description
+    }<span id="delete">X</span></h2>
     <div class="workout__details">
       <span class="workout__icon">${
         workout.type === 'running' ? '🏃‍♂️' : '🚴‍♀️'
@@ -255,7 +260,7 @@ class App {
 
     if (workout.type === 'cycling')
       html += `          
-        <div class="workout__details">
+      <div class="workout__details">
         <span class="workout__icon">⚡️</span>
         <span class="workout__value">${workout.speed.toFixed(1)}</span>
         <span class="workout__unit">km/h</span>
@@ -264,10 +269,16 @@ class App {
         <span class="workout__icon">⛰</span>
         <span class="workout__value">${workout.elevationGain}</span>
         <span class="workout__unit">m</span>
-      </div>
-    </li> -->`;
+        </div>
+    </li> `;
 
     form.insertAdjacentHTML('afterend', html);
+
+    // console.log(this.#workouts.length);
+    if (this.#workouts.length > 1) {
+      const deleteAll = document.querySelector('.delete__button');
+      deleteAll.style.display = 'block';
+    }
   }
 
   _moveToPopup(e) {
@@ -291,6 +302,23 @@ class App {
     // workout.click();
   }
 
+  _deleteWorkout(e) {
+    if (e.target && e.target.id == 'delete') {
+      const editWork = e.target.closest('.workout');
+
+      let workoutE = JSON.parse(localStorage.getItem('workouts'));
+      workoutE.forEach(function (workout, index) {
+        if (workout.id === editWork.dataset.id) {
+          workoutE.splice(index, 1);
+        }
+      });
+      localStorage.setItem('workouts', JSON.stringify(workoutE));
+      location.reload();
+    } else {
+      return;
+    }
+  }
+
   _setLocalStorage() {
     localStorage.setItem('workouts', JSON.stringify(this.#workouts));
   }
@@ -308,9 +336,22 @@ class App {
   }
 
   reset() {
-    localStorage.removeItem('workouts');
-    location.reload();
+      localStorage.removeItem('workouts');
+      location.reload();
   }
 }
 
 const app = new App();
+
+///////////////////////////////////////
+// Improvements
+// 1) Ability to edit a workout;
+// 2) Ability to delete a workout; (DONE)
+// 3) Ability to delete all workouts; (DONE)
+// 4) Ability to sort workouts by certain field (e.g. distance);
+// 5) Re-build running and Cycling objects coming from Local Storage;
+// 6) More realistic error and confirmation messages;
+// 7) Ability to position the map to show all workouts[very hard];
+// 8) Ability to draw lines and shapes instead of just points [very hard];
+// 9) Geocode location from cordination ("Run in Faro, Portugal") [only after asynchronous JavaScript section];
+// 10) Display weather data for workout time and place [only after asynchronous JavaScript section];
