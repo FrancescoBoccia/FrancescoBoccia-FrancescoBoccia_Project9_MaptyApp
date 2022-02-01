@@ -248,7 +248,7 @@ class App {
       html += `          
         <div class="workout__details">
         <span class="workout__icon">⚡️</span>
-        <input class="workout__value speed" value="${workout.pace.toFixed(1)}">
+        <input class="workout__value pace" value="${workout.pace.toFixed(1)}">
         <span class="workout__unit">min/km</span>
       </div>
       <div class="workout__details">
@@ -325,6 +325,9 @@ class App {
         workout.duration = +workoutValue;
       }
       if (editWorkout.classList.contains('speed')) {
+        workout.speed = +workoutValue;
+      }
+      if (editWorkout.classList.contains('pace')) {
         workout.pace = +workoutValue;
       }
       if (editWorkout.classList.contains('cadence')) {
