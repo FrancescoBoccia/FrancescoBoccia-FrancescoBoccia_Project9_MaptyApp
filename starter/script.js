@@ -68,7 +68,7 @@ const inputDistance = document.querySelector('.form__input--distance');
 const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
-const deleteAllButton = document.querySelector('.delete__button');
+const deleteAllWorkoutsButton = document.querySelector('.delete__button');
 
 class App {
   #map;
@@ -87,7 +87,7 @@ class App {
     inputType.addEventListener('change', this._toggleElevationField);
     containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
     document.addEventListener('click', this._deleteWorkout.bind(this));
-    deleteAllButton.addEventListener('click', this.reset.bind(this));
+    deleteAllWorkoutsButton.addEventListener('click', this.reset.bind(this));
   }
 
   _getPosition() {
@@ -235,12 +235,12 @@ class App {
       <span class="workout__icon">${
         workout.type === 'running' ? '🏃‍♂️' : '🚴‍♀️'
       }</span>
-      <span class="workout__value">${workout.distance}</span>
+      <input class="workout__value distance" value="${workout.distance}">
       <span class="workout__unit">km</span>
     </div>
     <div class="workout__details">
       <span class="workout__icon">⏱</span>
-      <span class="workout__value">${workout.duration}</span>
+      <input class="workout__value duration" value="${workout.duration}">
       <span class="workout__unit">min</span>
     </div>`;
 
@@ -248,12 +248,12 @@ class App {
       html += `          
         <div class="workout__details">
         <span class="workout__icon">⚡️</span>
-        <span class="workout__value">${workout.pace.toFixed(1)}</span>
+        <input class="workout__value speed" value="${workout.pace.toFixed(1)}">
         <span class="workout__unit">min/km</span>
       </div>
       <div class="workout__details">
         <span class="workout__icon">🦶🏼</span>
-        <span class="workout__value">${workout.cadence}</span>
+        <input class="workout__value cadence" value="${workout.cadence}">
         <span class="workout__unit">spm</span>
       </div>
       </li>`;
@@ -262,23 +262,30 @@ class App {
       html += `          
       <div class="workout__details">
         <span class="workout__icon">⚡️</span>
-        <span class="workout__value">${workout.speed.toFixed(1)}</span>
+        <input class="workout__value speed" value= "${workout.speed.toFixed(
+          1
+        )}">
         <span class="workout__unit">km/h</span>
       </div>
       <div class="workout__details">
         <span class="workout__icon">⛰</span>
-        <span class="workout__value">${workout.elevationGain}</span>
+        <input class="workout__value elevation" value="${
+          workout.elevationGain
+        }">
         <span class="workout__unit">m</span>
         </div>
     </li> `;
 
     form.insertAdjacentHTML('afterend', html);
 
-    // console.log(this.#workouts.length);
+    // Delete All Workouts Button
     if (this.#workouts.length > 1) {
       const deleteAll = document.querySelector('.delete__button');
       deleteAll.style.display = 'block';
     }
+
+    // Edit Workout
+    document.addEventListener('change', this._editWorkout.bind(this));
   }
 
   _moveToPopup(e) {
@@ -297,18 +304,44 @@ class App {
         duration: 1,
       },
     });
-
-    // Using the Public Interface
-    // workout.click();
   }
 
+  // Edit Workout
+  _editWorkout(e) {
+    const editWorkout = e.target.closest('.workout__value');
+    const workoutValue = editWorkout.value;
+
+    let workout = JSON.parse(localStorage.getItem('workouts'));
+
+    workout.forEach(function (workout) {
+      if (editWorkout.classList.contains('elevation')) {
+        workout.elevationGain = +workoutValue;
+        return;
+      }
+      if (editWorkout.classList.contains('distance')) {
+        workout.distance = +workoutValue;
+      }
+      if (editWorkout.classList.contains('duration')) {
+        workout.duration = +workoutValue;
+      }
+      if (editWorkout.classList.contains('speed')) {
+        workout.pace = +workoutValue;
+      }
+      if (editWorkout.classList.contains('cadence')) {
+        workout.cadence = +workoutValue;
+      }
+    });
+    localStorage.setItem('workouts', JSON.stringify(workout));
+  }
+
+  // Delete a single workout
   _deleteWorkout(e) {
     if (e.target && e.target.id == 'delete') {
-      const editWork = e.target.closest('.workout');
+      const deleteWorkout = e.target.closest('.workout');
 
       let workoutE = JSON.parse(localStorage.getItem('workouts'));
       workoutE.forEach(function (workout, index) {
-        if (workout.id === editWork.dataset.id) {
+        if (workout.id === deleteWorkout.dataset.id) {
           workoutE.splice(index, 1);
         }
       });
@@ -318,6 +351,9 @@ class App {
       return;
     }
   }
+
+  ////////////////
+  // Local Storage
 
   _setLocalStorage() {
     localStorage.setItem('workouts', JSON.stringify(this.#workouts));
@@ -336,8 +372,10 @@ class App {
   }
 
   reset() {
+    if (confirm('Do you want to delete all your workouts?') == true) {
       localStorage.removeItem('workouts');
       location.reload();
+    }
   }
 }
 
@@ -346,8 +384,6 @@ const app = new App();
 ///////////////////////////////////////
 // Improvements
 // 1) Ability to edit a workout;
-// 2) Ability to delete a workout; (DONE)
-// 3) Ability to delete all workouts; (DONE)
 // 4) Ability to sort workouts by certain field (e.g. distance);
 // 5) Re-build running and Cycling objects coming from Local Storage;
 // 6) More realistic error and confirmation messages;
