@@ -241,3 +241,8 @@ a:visited {
 .delete__button.hidden {
   display: none;
 }
+.workout__value{
+  max-width: 7rem;
+  border-radius: 5px;
+  border: none;
+}

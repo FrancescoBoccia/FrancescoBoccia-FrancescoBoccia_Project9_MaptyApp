@@ -235,12 +235,12 @@ class App {
       <span class="workout__icon">${
         workout.type === 'running' ? '🏃‍♂️' : '🚴‍♀️'
       }</span>
-      <input class="workout__value distance" value="${workout.distance}">
+      <input class="workout__value distance__value" value="${workout.distance}">
       <span class="workout__unit">km</span>
     </div>
     <div class="workout__details">
       <span class="workout__icon">⏱</span>
-      <input class="workout__value duration" value="${workout.duration}">
+      <input class="workout__value duration__value" value="${workout.duration}">
       <span class="workout__unit">min</span>
     </div>`;
 
@@ -248,12 +248,14 @@ class App {
       html += `          
         <div class="workout__details">
         <span class="workout__icon">⚡️</span>
-        <input class="workout__value pace" value="${workout.pace.toFixed(1)}">
+        <input class="workout__value pace__value" value="${workout.pace.toFixed(
+          1
+        )}">
         <span class="workout__unit">min/km</span>
       </div>
       <div class="workout__details">
         <span class="workout__icon">🦶🏼</span>
-        <input class="workout__value cadence" value="${workout.cadence}">
+        <input class="workout__value cadence__value" value="${workout.cadence}">
         <span class="workout__unit">spm</span>
       </div>
       </li>`;
@@ -262,14 +264,14 @@ class App {
       html += `          
       <div class="workout__details">
         <span class="workout__icon">⚡️</span>
-        <input class="workout__value speed" value= "${workout.speed.toFixed(
+        <input class="workout__value speed__value" value= "${workout.speed.toFixed(
           1
         )}">
         <span class="workout__unit">km/h</span>
       </div>
       <div class="workout__details">
         <span class="workout__icon">⛰</span>
-        <input class="workout__value elevation" value="${
+        <input class="workout__value elevation__value" value="${
           workout.elevationGain
         }">
         <span class="workout__unit">m</span>
@@ -283,9 +285,55 @@ class App {
       const deleteAll = document.querySelector('.delete__button');
       deleteAll.style.display = 'block';
     }
-
     // Edit Workout
     document.addEventListener('change', this._editWorkout.bind(this));
+  }
+  // Edit Workout
+  _editWorkout(e) {
+    const editWorkout = e.target;
+    const workoutEl = e.target.closest('.workout');
+
+    let workout = JSON.parse(localStorage.getItem('workouts'));
+
+    workout.forEach(function (workout) {
+      if (
+        editWorkout.classList.contains('elevation__value') &&
+        workout.id === workoutEl.dataset.id
+      ) {
+        workout.elevationGain = +editWorkout.value;
+        return;
+      }
+      if (
+        editWorkout.classList.contains('distance__value') &&
+        workout.id === workoutEl.dataset.id
+      ) {
+        workout.distance = +editWorkout.value;
+        return;
+      }
+      if (
+        editWorkout.classList.contains('duration__value') &&
+        workout.id === workoutEl.dataset.id
+      ) {
+        workout.duration = +editWorkout.value;
+      }
+      if (
+        editWorkout.classList.contains('cadence__value') &&
+        workout.id === workoutEl.dataset.id
+      ) {
+        workout.cadence = +editWorkout.value;
+      }
+      if (workout.type === 'running') {
+        workout.pace = workout.duration / workout.distance;
+        workout.pace;
+      }
+
+      if (workout.type === 'cycling') {
+        workout.speed = workout.distance / (workout.duration / 60);
+        workout.speed;
+      }
+    });
+
+    localStorage.setItem('workouts', JSON.stringify(workout));
   }
 
   _moveToPopup(e) {
@@ -304,37 +352,6 @@ class App {
         duration: 1,
       },
     });
-  }
-
-  // Edit Workout
-  _editWorkout(e) {
-    const editWorkout = e.target.closest('.workout__value');
-    const workoutValue = editWorkout.value;
-
-    let workout = JSON.parse(localStorage.getItem('workouts'));
-
-    workout.forEach(function (workout) {
-      if (editWorkout.classList.contains('elevation')) {
-        workout.elevationGain = +workoutValue;
-        return;
-      }
-      if (editWorkout.classList.contains('distance')) {
-        workout.distance = +workoutValue;
-      }
-      if (editWorkout.classList.contains('duration')) {
-        workout.duration = +workoutValue;
-      }
-      if (editWorkout.classList.contains('speed')) {
-        workout.speed = +workoutValue;
-      }
-      if (editWorkout.classList.contains('pace')) {
-        workout.pace = +workoutValue;
-      }
-      if (editWorkout.classList.contains('cadence')) {
-        workout.cadence = +workoutValue;
-      }
-    });
-    localStorage.setItem('workouts', JSON.stringify(workout));
   }
 
   // Delete a single workout
@@ -386,7 +403,6 @@ const app = new App();
 
 ///////////////////////////////////////
 // Improvements
-// 1) Ability to edit a workout;
 // 4) Ability to sort workouts by certain field (e.g. distance);
 // 5) Re-build running and Cycling objects coming from Local Storage;
 // 6) More realistic error and confirmation messages;
