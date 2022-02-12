@@ -69,6 +69,11 @@ const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
 const deleteAllWorkoutsButton = document.querySelector('.delete__button');
+// const sortWorkouts = document.querySelector('.sort__workout');
+// const sortDate = document.querySelector('.sort__date');
+// const sortDistance = document.querySelector('.sort__distance');
+// const sortDuration = document.querySelector('.sort__duration');
+const error = document.querySelector('.error__message');
 
 class App {
   #map;
@@ -83,11 +88,15 @@ class App {
     //Get data from localstorage
     this._getLocalStorage();
 
+    // All Events Listener
     form.addEventListener('submit', this._newWorkout.bind(this));
     inputType.addEventListener('change', this._toggleElevationField);
     containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
     document.addEventListener('click', this._deleteWorkout.bind(this));
     deleteAllWorkoutsButton.addEventListener('click', this.reset.bind(this));
+    document.addEventListener('change', this._editWorkout.bind(this));
+    // sortDistance.addEventListener('click', this._sortWorkout.bind(this));
+    error.addEventListener('click', this._errorMessage.bind(this));
   }
 
   _getPosition() {
@@ -101,12 +110,12 @@ class App {
       );
   }
 
+  // Leaflet Library
   _loadMap(position) {
     const { latitude } = position.coords;
     const { longitude } = position.coords;
     console.log(`https://www.google.cz/maps/@${latitude},${longitude}`);
 
-    // Leaflet Library
     const coords = [latitude, longitude];
 
     this.#map = L.map('map').setView(coords, this.#mapZoomLevel); // #mapZoomLevel is the zoom of the map
@@ -125,6 +134,7 @@ class App {
     });
   }
 
+  // Show Workout Form
   _showForm(mapE) {
     this.#mapEvent = mapE;
     form.classList.remove('hidden');
@@ -141,6 +151,10 @@ class App {
     form.style.display = 'none';
     form.classList.add('hidden');
     setTimeout(() => (form.style.display = 'grid'), 1000);
+  }
+
+  _errorMessage() {
+    error.classList.toggle('hidden');
   }
 
   _toggleElevationField() {
@@ -172,7 +186,7 @@ class App {
         !validInputs(distance, duration, cadence) ||
         !allPositive(distance, duration, cadence)
       )
-        return alert('Inputs have to be a positive numbers!');
+        return this._errorMessage();
 
       workout = new Running([lat, lng], distance, duration, cadence);
     }
@@ -184,7 +198,7 @@ class App {
         !validInputs(distance, duration, elevation) ||
         !allPositive(distance, duration)
       )
-        return alert('Inputs have to be a positive numbers!');
+        return this._errorMessage();
 
       workout = new Cycling([lat, lng], distance, duration, elevation);
     }
@@ -288,12 +302,32 @@ class App {
     // Edit Workout
     document.addEventListener('change', this._editWorkout.bind(this));
   }
+
+  // // Sort Workouts
+  // _sortWorkout() {
+  //   let workout = [];
+  //   let workoutSorted = false;
+
+  //   this.#workouts.forEach(function (work, i) {
+  //     workout.push(work.distance);
+
+  //     workout.sort((a, b) => a - b);
+  //     workoutSorted = !workoutSorted;
+  //   });
+  //   console.log(workoutSorted);
+  //   console.log(workout);
+  // }
+
   // Edit Workout
   _editWorkout(e) {
     const editWorkout = e.target;
     const workoutEl = e.target.closest('.workout');
 
     let workout = JSON.parse(localStorage.getItem('workouts'));
+
+    if (workout == null) {
+      return;
+    }
 
     workout.forEach(function (workout) {
       if (
@@ -405,7 +439,7 @@ const app = new App();
 // Improvements
 // 4) Ability to sort workouts by certain field (e.g. distance);
 // 5) Re-build running and Cycling objects coming from Local Storage;
-// 6) More realistic error and confirmation messages;
+// 6) More realistic confirmation messages;
 // 7) Ability to position the map to show all workouts[very hard];
 // 8) Ability to draw lines and shapes instead of just points [very hard];
 // 9) Geocode location from cordination ("Run in Faro, Portugal") [only after asynchronous JavaScript section];

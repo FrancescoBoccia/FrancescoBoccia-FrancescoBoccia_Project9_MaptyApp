@@ -225,6 +225,9 @@ a:visited {
   font-size: 1.2rem;
   cursor: pointer;
 }
+#delete:hover {
+  transform: scale(1.4);
+}
 .delete__button {
   margin: 0 auto;
   margin-top: 4rem;
@@ -238,11 +241,48 @@ a:visited {
   border-radius: 5px;
   cursor: pointer;
 }
+.delete__button:hover {
+  transform: scale(1.1);
+}
+
 .delete__button.hidden {
   display: none;
 }
-.workout__value{
+.workout__value {
   max-width: 7rem;
   border-radius: 5px;
   border: none;
+}
+
+.sort__workout {
+  display: flex;
+  list-style: none;
+  font-size: 15px;
+  justify-content: center;
+  align-items: center;
+}
+.sort__workout > li {
+  width: 100%;
+  margin-left: 50px;
+  font-style: italic;
+}
+.sort__workout > li > span {
+  font-weight: 900;
+  font-style: normal;
+}
+
+.error__message{
+  position: absolute;
+  font-weight: 900;
+  font-size: 1.95vw;
+  background-color: var(--color-dark--2);
+  color: red;
+  padding: 23px;
+  border-radius: 5px;
+  max-width: 100%;
+  text-align: center;
+}
+
+.error__message.hidden {
+  display: none;
 }
