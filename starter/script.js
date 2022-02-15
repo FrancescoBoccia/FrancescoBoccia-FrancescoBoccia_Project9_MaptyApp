@@ -74,6 +74,9 @@ const deleteAllWorkoutsButton = document.querySelector('.delete__button');
 // const sortDistance = document.querySelector('.sort__distance');
 // const sortDuration = document.querySelector('.sort__duration');
 const error = document.querySelector('.error__message');
+const deleteAllModel = document.querySelector('.deleteConfrimation');
+const confirmButtonDeleteWorkouts = document.querySelector('.deleteWorkouts');
+const cancelButtonDeleteWorkouts = document.querySelector('.cancelOutcome');
 
 class App {
   #map;
@@ -93,10 +96,17 @@ class App {
     inputType.addEventListener('change', this._toggleElevationField);
     containerWorkouts.addEventListener('click', this._moveToPopup.bind(this));
     document.addEventListener('click', this._deleteWorkout.bind(this));
-    deleteAllWorkoutsButton.addEventListener('click', this.reset.bind(this));
+    deleteAllWorkoutsButton.addEventListener(
+      'click',
+      this._deleteAllWorkouts.bind(this)
+    );
     document.addEventListener('change', this._editWorkout.bind(this));
     // sortDistance.addEventListener('click', this._sortWorkout.bind(this));
     error.addEventListener('click', this._errorMessage.bind(this));
+    deleteAllModel.addEventListener(
+      'click',
+      this._deleteAllWorkoutsModel.bind(this)
+    );
   }
 
   _getPosition() {
@@ -335,14 +345,12 @@ class App {
         workout.id === workoutEl.dataset.id
       ) {
         workout.elevationGain = +editWorkout.value;
-        return;
       }
       if (
         editWorkout.classList.contains('distance__value') &&
         workout.id === workoutEl.dataset.id
       ) {
         workout.distance = +editWorkout.value;
-        return;
       }
       if (
         editWorkout.classList.contains('duration__value') &&
@@ -425,11 +433,24 @@ class App {
     });
   }
 
-  reset() {
-    if (confirm('Do you want to delete all your workouts?') == true) {
+  // Delete All Workouts and confirmation before deleting all
+
+  _deleteAllWorkoutsModel(e) {
+    e.preventDefault();
+
+    if (e.target === confirmButtonDeleteWorkouts) {
       localStorage.removeItem('workouts');
       location.reload();
     }
+    if (e.target === cancelButtonDeleteWorkouts) {
+      deleteAllModel.classList.add('hidden');
+      deleteAllWorkoutsButton.classList.add('delete__button');
+    }
+  }
+
+  _deleteAllWorkouts() {
+    deleteAllModel.classList.toggle('hidden');
+    deleteAllWorkoutsButton.classList.toggle('delete__button');
   }
 }
 
@@ -439,7 +460,6 @@ const app = new App();
 // Improvements
 // 4) Ability to sort workouts by certain field (e.g. distance);
 // 5) Re-build running and Cycling objects coming from Local Storage;
-// 6) More realistic confirmation messages;
 // 7) Ability to position the map to show all workouts[very hard];
 // 8) Ability to draw lines and shapes instead of just points [very hard];
 // 9) Geocode location from cordination ("Run in Faro, Portugal") [only after asynchronous JavaScript section];
